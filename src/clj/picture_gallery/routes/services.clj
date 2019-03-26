@@ -1,16 +1,17 @@
 (ns picture-gallery.routes.services
-  (:require
-    [reitit.swagger :as swagger]
-    [reitit.swagger-ui :as swagger-ui]
-    [reitit.ring.coercion :as coercion]
-    [reitit.coercion.spec :as spec-coercion]
-    [reitit.ring.middleware.muuntaja :as muuntaja]
-    [reitit.ring.middleware.exception :as exception]
-    [reitit.ring.middleware.multipart :as multipart]
-    [reitit.ring.middleware.parameters :as parameters]
-    [picture-gallery.middleware.formats :as formats]
-    [ring.util.http-response :refer :all]
-    [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]
+            [picture-gallery.middleware.formats :as formats]
+            [picture-gallery.routes.services.auth :as auth]
+            [reitit.coercion.spec :as spec-coercion]
+            [reitit.ring.coercion :as coercion]
+            [reitit.ring.middleware.exception :as exception]
+            [reitit.ring.middleware.multipart :as multipart]
+            [reitit.ring.middleware.muuntaja :as muuntaja]
+            [reitit.ring.middleware.parameters :as parameters]
+            [reitit.swagger :as swagger]
+            [reitit.swagger-ui :as swagger-ui]
+            [ring.util.http-response :refer :all]
+            [schema.core :as s]))
 
 (defn service-routes []
   ["/api"
