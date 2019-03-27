@@ -23,8 +23,9 @@
 
 (defn register!
   [{:keys [session]} user]
-  (if (validation/registration-errors user)
-    (response/precondition-failed {:result :error})
+  (if-let [error (validation/registration-errors user)]
+    (response/precondition-failed {:result :error
+                                   :message error})
     (try
       (db/create-user!
        (-> user

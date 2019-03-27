@@ -50,7 +50,16 @@
 
    ["/ping"
     {:get (constantly (ok {:message "pong"}))}]
-   
+
+   ["/register"
+    {:post {:summary "register a new user"
+            :parameters {:body {:id string?
+                                :pass string?
+                                :pass-confirm string?}}
+            :response {200 {:body {:result keyword?
+                                   :message string?}}}
+            :handler (fn [{:keys [parameters] :as req}]
+                       (auth/register! req (:body parameters)))}}]
 
    ["/math"
     {:swagger {:tags ["math"]}}
