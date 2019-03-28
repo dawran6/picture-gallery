@@ -10,7 +10,7 @@
    [:div {:style {:z-index 1}}]])
 
 (defn input [type id placeholder fields]
-  [:input.input.is-large
+  [:input.input
    {:type type
     :placeholder placeholder
     :value (id @fields)
@@ -21,9 +21,10 @@
    [:label.label label]
    (if optional?
      [input type id placeholder fields]
-     [:div.field.has-addons
+     [:div.control.has-icons-right
       [input type id placeholder fields]
-      [:span "*"]])])
+      [:span.icon.is-right "*"
+       #_[:i.fas.fa-asterisk]]])])
 
 (defn text-input [label id placeholder fields & [optional?]]
   (form-input :text label id placeholder fields optional?))
