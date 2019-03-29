@@ -5,8 +5,6 @@
             [reagent.core :as r]))
 
 (defn register! [session fields errors]
-  (def fields fields)
-  (def errors errors)
   (reset! errors (validation/registration-errors @fields))
   (when-not @errors
     (ajax/POST "/api/register"
@@ -14,7 +12,8 @@
                 :handler
                 #(do
                    (swap! session update :identity (:id @fields))
-                   (reset! fields {}))
+                   (reset! fields {})
+                   (swap! session dissoc :modal))
                 :error-handler
                 #(reset! errors {:server-error (get-in % [:response :message])})})))
 
@@ -28,7 +27,11 @@
        [:div
         [:strong "* required field"]
         [c/text-input "name" :id "enter a user name" fields]
+        (when-let [error (first (:id @error))]
+          [:div.help.is-danger error])
         [c/password-input "password" :pass "enter a password" fields]
+        (when-let [error (first (:pass @error))]
+          [:div.help.is-danger error])
         [c/password-input "password" :pass-confirm "re-enter the password" fields]
         (when-let [error (:server-error @error)]
           [:div.help.is-danger error])]
