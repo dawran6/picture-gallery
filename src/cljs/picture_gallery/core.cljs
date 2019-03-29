@@ -13,6 +13,15 @@
 
 (defonce session (r/atom {:page :home}))
 
+(defn user-menu []
+  (if-let [id (:identity @session)]
+    [:a.navbar-item
+     {:on-click #(swap! session dissoc :identity)}
+     [:i.fa.fa-user] " " id " | sign out"]
+    [:a.navbar-item
+     {:on-click #(swap! session assoc :modal reg/registration-form)}
+     "register"]))
+
 (defn nav-link [uri title page]
   [:a.navbar-item
    {:href   uri
@@ -33,7 +42,12 @@
       {:class (when @expanded? :is-active)}
       [:div.navbar-end
        [nav-link "#/" "Home" :home]
-       [nav-link "#/about" "About" :about]]]]))
+       [nav-link "#/about" "About" :about]]
+      [user-menu]]]))
+
+(defn modal []
+  (when-let [session-modal (:modal @session)]
+    [session-modal session]))
 
 (defn about-page []
   [:section.section>div.container>div.content
@@ -50,9 +64,8 @@
 
 (defn page []
   [:div
-   ;; modal test
-   [reg/registration-form]
-   #_[(pages (:page @session))]])
+   [modal]
+   [(pages (:page @session))]])
 
 ;; -------------------------
 ;; Routes

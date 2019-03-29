@@ -11,7 +11,8 @@
   (if (local-uri? request)
     (-> request
         #_(update :uri #(str js/context %))
-        (update :headers #(merge {"x-csrf-token" js/csrfToken} %)))
+        (update :headers #(merge {"Accept" "application/transit+json"
+                                  "x-csrf-token" js/csrfToken} %)))
     request))
 
 ;; injects transit serialization config into request options
@@ -27,4 +28,4 @@
   (swap! ajax/default-interceptors
          conj
          (ajax/to-interceptor {:name "default headers"
-:request default-headers})))
+                               :request default-headers})))
