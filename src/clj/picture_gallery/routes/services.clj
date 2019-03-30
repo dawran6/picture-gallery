@@ -10,8 +10,7 @@
             [reitit.ring.middleware.parameters :as parameters]
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
-            [ring.util.http-response :refer :all]
-            [schema.core :as s]))
+            [ring.util.http-response :refer :all]))
 
 (defn service-routes []
   ["/api"
@@ -60,6 +59,18 @@
                                    :message string?}}}
             :handler (fn [{:keys [parameters] :as req}]
                        (auth/register! req (:body parameters)))}}]
+
+   ["/login"
+    {:post {:summary "log in the user and create a session"
+            :security {:basic-auth :string?}
+            :response {200 {:body {:result keyword?
+                                   :message string?}}}
+            :handler (fn [req]
+                       (auth/login! req))}}]
+
+   ["/logout"
+    {:post {:summary "remove user session"
+            :handler auth/logout!}}]
 
    ["/math"
     {:swagger {:tags ["math"]}}
