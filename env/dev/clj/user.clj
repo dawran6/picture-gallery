@@ -40,4 +40,7 @@
 (defn create-migration [name]
   (migrations/create name (select-keys env [:database-url])))
 
-
+(str "Basic "
+     (.encodeToString
+      (java.util.Base64/getEncoder)
+      (.getBytes "foo:1234567")))

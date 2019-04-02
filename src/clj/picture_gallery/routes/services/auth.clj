@@ -49,12 +49,11 @@
     (when (hashers/check pass (:pass user))
       id)))
 
-(defn login! [{:keys [session headers] :as req}]
-  (def req req)
-  (if-let [id (authenticate (decode-auth (get headers "authorization")))]
+(defn login! [{:keys [session]} auth]
+  (if-let [id (authenticate (decode-auth auth))]
     (-> {:result :ok}
         (response/ok)
-        (assoc :session (assoc session :identity id)))
+        #_(assoc :session (assoc session :identity id)))
     (response/unauthorized {:result :unauthorized
                             :message "login failure"})))
 
@@ -62,3 +61,22 @@
   (-> {:result :ok}
       (response/ok)
       (assoc :session nil)))
+
+(comment
+
+  (def auth
+    (str "Basic "
+         (.encodeToString
+          (java.util.Base64/getEncoder)
+          (.getBytes "foo:1234567"))))
+
+  (-> auth
+      print)
+
+  (->
+   (decode-auth auth)
+   authenticate)
+
+  (login! {:session nil} auth)
+
+  )

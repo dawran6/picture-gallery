@@ -10,7 +10,8 @@
             [reitit.ring.middleware.parameters :as parameters]
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
-            [ring.util.http-response :refer :all]))
+            [ring.util.http-response :refer :all]
+            [reitit.ring :as ring]))
 
 (defn service-routes []
   ["/api"
@@ -27,7 +28,7 @@
                  exception/exception-middleware
                  ;; decoding request body
                  muuntaja/format-request-middleware
-                 ;; coercing response bodys
+                 ;; coercing response body
                  coercion/coerce-response-middleware
                  ;; coercing request parameters
                  coercion/coerce-request-middleware
@@ -62,11 +63,14 @@
 
    ["/login"
     {:post {:summary "log in the user and create a session"
-            :security {:basic-auth :string?}
+            :parameters {:header {:Authorization string?}}
             :response {200 {:body {:result keyword?
                                    :message string?}}}
-            :handler (fn [req]
-                       (auth/login! req))}}]
+            :handler
+            (fn [req] {:status 200
+                       :body :ok})
+            #_(fn [{{{:keys [Authorization]} :header} :parameters :as req}]
+                (auth/login! req Authorization))}}]
 
    ["/logout"
     {:post {:summary "remove user session"
@@ -110,3 +114,57 @@
                         :body (-> "public/img/warning_clojure.png"
                                   (io/resource)
                                   (io/input-stream))})}}]]])
+
+(comment
+
+  (require '[reitit.core])
+
+  (def router
+    (ring/router
+     ["/api"
+      {:coercion spec-coercion/coercion
+       :muuntaja formats/instance
+       :swagger {:id ::api}
+       :middleware [;; query-params & form-params
+                    parameters/parameters-middleware
+                    ;; content-negotiation
+                    muuntaja/format-negotiate-middleware
+                    ;; encoding response body
+                    muuntaja/format-response-middleware
+                    ;; exception handling
+                    exception/exception-middleware
+                    ;; decoding request body
+                    muuntaja/format-request-middleware
+                    ;; coercing response bodys
+                    coercion/coerce-response-middleware
+                    ;; coercing request parameters
+                    coercion/coerce-request-middleware
+                    ;; multipart
+                    multipart/multipart-middleware]}
+
+      ["/login"
+       {:post {:summary "log in the user and create a session"
+               :parameters {:header {:Authorization string?}}
+               :handler
+               (fn [{{{:keys [Authorization]} :header} :parameters :as req}]
+                 (auth/login! req Authorization)
+                 )}}]
+      ]))
+
+  (reitit.core/match-by-path router "/api/login")
+
+  (def router
+    (ring/router (service-routes)))
+
+  (def app (ring/ring-handler router))
+
+  (-> (app {:request-method :post
+            :uri "/api/login"
+            :headers {"Authorization" "Basic Zm9vOjEyMzQ1Njc="
+                      "Accept" "application/json"
+                      "Content-Type" "application/json"}})
+      :body
+      slurp
+      )
+
+  )
