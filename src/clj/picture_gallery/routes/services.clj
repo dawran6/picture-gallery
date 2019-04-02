@@ -1,8 +1,10 @@
 (ns picture-gallery.routes.services
   (:require [clojure.java.io :as io]
+            [picture-gallery.middleware :as middleware]
             [picture-gallery.middleware.formats :as formats]
             [picture-gallery.routes.services.auth :as auth]
             [reitit.coercion.spec :as spec-coercion]
+            [reitit.ring :as ring]
             [reitit.ring.coercion :as coercion]
             [reitit.ring.middleware.exception :as exception]
             [reitit.ring.middleware.multipart :as multipart]
@@ -10,8 +12,7 @@
             [reitit.ring.middleware.parameters :as parameters]
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
-            [ring.util.http-response :refer :all]
-            [reitit.ring :as ring]))
+            [ring.util.http-response :refer :all]))
 
 (defn service-routes []
   ["/api"
@@ -63,14 +64,12 @@
 
    ["/login"
     {:post {:summary "log in the user and create a session"
-            :parameters {:header {:Authorization string?}}
+            ;:parameters {:header {:Authorization string?}}
             :response {200 {:body {:result keyword?
                                    :message string?}}}
             :handler
-            (fn [req] {:status 200
-                       :body :ok})
-            #_(fn [{{{:keys [Authorization]} :header} :parameters :as req}]
-                (auth/login! req Authorization))}}]
+            (fn [{:keys [headers] :as req}]
+              (auth/login! req (get headers "authorization")))}}]
 
    ["/logout"
     {:post {:summary "remove user session"
@@ -145,10 +144,12 @@
       ["/login"
        {:post {:summary "log in the user and create a session"
                :parameters {:header {:Authorization string?}}
+               :response {200 {:body {:result keyword?
+                                      :message string?}}}
                :handler
-               (fn [{{{:keys [Authorization]} :header} :parameters :as req}]
-                 (auth/login! req Authorization)
-                 )}}]
+               (fn [req] {:status 200
+                          :body :ok})
+               }}]
       ]))
 
   (reitit.core/match-by-path router "/api/login")
@@ -156,7 +157,7 @@
   (def router
     (ring/router (service-routes)))
 
-  (def app (ring/ring-handler router))
+  (def app (middleware/wrap-base (ring/ring-handler router)))
 
   (-> (app {:request-method :post
             :uri "/api/login"
