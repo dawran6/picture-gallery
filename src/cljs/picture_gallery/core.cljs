@@ -21,7 +21,7 @@
                   "/api/logout"
                   {:handler (fn [] (swap! session dissoc :identity))})}
      [:i.fa.fa-user] " " id " | sign out"]
-    [:span
+    [:<>
      [:a.navbar-item
       {:on-click #(swap! session assoc :modal login/login-form)}
       "login"]
@@ -47,10 +47,11 @@
        [:span][:span][:span]]]
      [:div#nav-menu.navbar-menu
       {:class (when @expanded? :is-active)}
-      [:div.navbar-end
+      [:div.navbar-start
        [nav-link "#/" "Home" :home]
        [nav-link "#/about" "About" :about]]
-      [user-menu]]]))
+      [:div.navbar-end
+       [user-menu]]]]))
 
 (defn modal []
   (when-let [session-modal (:modal @session)]
