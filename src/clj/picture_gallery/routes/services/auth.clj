@@ -56,7 +56,7 @@
     (response/unauthorized {:result :unauthorized
                             :message "login failure"})))
 
-(defn logout! []
+(defn logout! [req]
   (-> {:result :ok}
       (response/ok)
       (assoc :session nil)))
