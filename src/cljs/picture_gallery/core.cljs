@@ -6,6 +6,7 @@
             [markdown.core :refer [md->html]]
             [picture-gallery.ajax :as ajax]
             [picture-gallery.components.common :as c]
+            [picture-gallery.components.login :as login]
             [picture-gallery.components.registration :as reg]
             [reagent.core :as r]
             [reitit.core :as reitit])
@@ -16,11 +17,17 @@
 (defn user-menu []
   (if-let [id (:identity @session)]
     [:a.navbar-item
-     {:on-click #(swap! session dissoc :identity)}
+     {:on-click #(POST
+                  "/api/logout"
+                  {:handler (fn [] (swap! session dissoc :identity))})}
      [:i.fa.fa-user] " " id " | sign out"]
-    [:a.navbar-item
-     {:on-click #(swap! session assoc :modal reg/registration-form)}
-     "register"]))
+    [:span
+     [:a.navbar-item
+      {:on-click #(swap! session assoc :modal login/login-form)}
+      "login"]
+     [:a.navbar-item
+      {:on-click #(swap! session assoc :modal reg/registration-form)}
+      "register"]]))
 
 (defn nav-link [uri title page]
   [:a.navbar-item
