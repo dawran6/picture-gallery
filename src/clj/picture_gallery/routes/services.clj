@@ -64,12 +64,12 @@
 
    ["/login"
     {:post {:summary "log in the user and create a session"
-            ;:parameters {:header {:Authorization string?}}
+            :parameters {:header {:authorization string?}}
             :response {200 {:body {:result keyword?
                                    :message string?}}}
             :handler
-            (fn [{:keys [headers] :as req}]
-              (auth/login! req (get headers "authorization")))}}]
+            (fn [{{{:keys [authorization]} :header} :parameters :as req}]
+              (auth/login! req authorization))}}]
 
    ["/logout"
     {:post {:summary "remove user session"
