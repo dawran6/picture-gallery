@@ -49,8 +49,6 @@
       id)))
 
 (defn login! [{:keys [session] :as req} auth]
-  (def req req)
-  (def auth auth)
   (if-let [id (authenticate (decode-auth auth))]
     (-> {:result :ok}
         (response/ok)

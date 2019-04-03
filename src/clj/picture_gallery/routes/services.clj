@@ -119,49 +119,13 @@
   (require '[reitit.core])
 
   (def router
-    (ring/router
-     ["/api"
-      {:coercion spec-coercion/coercion
-       :muuntaja formats/instance
-       :swagger {:id ::api}
-       :middleware [;; query-params & form-params
-                    parameters/parameters-middleware
-                    ;; content-negotiation
-                    muuntaja/format-negotiate-middleware
-                    ;; encoding response body
-                    muuntaja/format-response-middleware
-                    ;; exception handling
-                    exception/exception-middleware
-                    ;; decoding request body
-                    muuntaja/format-request-middleware
-                    ;; coercing response bodys
-                    coercion/coerce-response-middleware
-                    ;; coercing request parameters
-                    coercion/coerce-request-middleware
-                    ;; multipart
-                    multipart/multipart-middleware]}
-
-      ["/login"
-       {:post {:summary "log in the user and create a session"
-               :parameters {:header {:Authorization string?}}
-               :response {200 {:body {:result keyword?
-                                      :message string?}}}
-               :handler
-               (fn [req] {:status 200
-                          :body :ok})
-               }}]
-      ]))
-
-  (reitit.core/match-by-path router "/api/login")
-
-  (def router
     (ring/router (service-routes)))
 
   (def app (middleware/wrap-base (ring/ring-handler router)))
 
   (-> (app {:request-method :post
             :uri "/api/login"
-            :headers {"Authorization" "Basic Zm9vOjEyMzQ1Njc="
+            :headers {"authorization" "Basic Zm9vOjEyMzQ1Njc="
                       "Accept" "application/json"
                       "Content-Type" "application/json"}})
       :body
